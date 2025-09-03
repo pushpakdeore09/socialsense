@@ -1,0 +1,52 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Optional npm cache directory
+.npm/
+
+# Build directories
+dist/
+build/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# Testing output
+coverage/
+
+# Local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Optional: PM2 process logs
+pids/
+*.pid
+*.seed
+
+# Optional: dotenvx secrets
+.env.vault
+
+# TypeScript
+*.tsbuildinfo
+
+# Husky
+.husky/_/
