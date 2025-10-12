@@ -8,9 +8,13 @@ import {
   Button,
   Container,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { BarChart3 } from "lucide-react";
+import useAuth from "../store/useAuth";
 
 const NavBar = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = useAuth((store) => store.isAuthenticated);
   const navLinks = [
     { name: "Home", href: "#", active: true },
     { name: "About", href: "#", active: false },
@@ -27,50 +31,61 @@ const NavBar = () => {
     >
       <Container maxWidth="lg">
         <Toolbar className="flex justify-between items-center py-3">
-          {/* Left: Logo */}
-          <Box className="flex items-center space-x-2 select-none">
-            <Avatar className="bg-white w-9 h-9 shadow-md">
-              <BarChart3 className="w-5 h-5 text-teal-600" />
+          <Box className="flex items-center space-x-3 select-none">
+            <Avatar className="bg-gradient-to-r from-teal-400 to-teal-600 w-10 h-10 shadow-lg p-2">
+              <BarChart3 className="w-6 h-6 text-white" />
             </Avatar>
             <Typography
               variant="h5"
-              className="font-bold text-white tracking-tight"
+              className="font-semibold text-white tracking-tight capitalize"
             >
               SocialSense
             </Typography>
           </Box>
 
-          {/* Middle: Nav Links */}
-          <Box className="hidden md:flex items-center space-x-8">
+          <Box className="hidden md:flex items-center space-x-12">
             {navLinks.map((link) => (
               <Button
                 key={link.name}
                 href={link.href}
                 disableRipple
-                className={`font-medium normal-case text-base transition-all duration-200 ${
+                className={`relative font-bold normal-case text-base transition-all duration-300 ${
                   link.active
-                    ? "text-white font-semibold border-b-2 border-white"
-                    : "text-gray-100 hover:text-white"
+                    ? "text-yellow-400"
+                    : "text-gray-300 hover:text-white"
                 }`}
                 sx={{
                   backgroundColor: "transparent",
-                  "&:hover": { backgroundColor: "transparent" },
-                  color: link.active ? "#fff" : "#f0fdf4",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                    color: link.active ? "#FACC15" : "#FFFFFF",
+                  },
+                  color: link.active ? "#FACC15" : "#D1D5DB",
+                  transform: link.active ? "scale(1.05)" : "none",
                 }}
               >
                 {link.name}
+                {link.active && (
+                  <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></span>
+                )}
               </Button>
             ))}
           </Box>
 
-          {/* Right: CTA Button */}
           <Button
             variant="contained"
-            className="bg-white text-teal-700 hover:bg-gray-100 normal-case px-6 py-2 rounded-xl shadow-md font-semibold text-sm transition-all duration-200"
+            className="bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 normal-case px-6 py-2 rounded-xl shadow-lg font-semibold text-sm transition-all duration-300 transform hover:scale-105"
             sx={{
-              "&:hover": { backgroundColor: "#3f4f6f" },
+              backgroundColor: "#4F7B7F",
+              "&:hover": {
+                background: "linear-gradient(90deg, #1D4D4F, #0E3A3B)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                color: "#ffffff",
+              },
             }}
-            onClick={() => console.log("Get Started clicked")}
+            onClick={() =>
+              isAuthenticated ? navigate("/dashboard") : navigate("/login")
+            }
           >
             Get Started
           </Button>
