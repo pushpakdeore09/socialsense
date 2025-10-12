@@ -1,12 +1,14 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-export function dbConnect(){
-    mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
+export async function dbConnect() {
+    try {
+        if (!process.env.MONGO_URI) {
+            throw new Error('MONGO_URI is not defined in the environment variables');
+        }
+        await mongoose.connect(process.env.MONGO_URI);
+
         console.log('Connected to Database');
-    })
-    .catch(error => {
-        console.log(error);
-        
-    })
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error.message || error);
+    }
 }

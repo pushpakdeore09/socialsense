@@ -1,6 +1,6 @@
 import * as userService from "../services/user.service.js";
 import { validationResult } from "express-validator";
-import userSchema from "../models/user.model/js";
+import userSchema from "../models/user.model.js";
 
 export const registerController = async (req, res) => {
   const errors = validationResult(req);
