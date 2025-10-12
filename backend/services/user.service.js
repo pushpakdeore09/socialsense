@@ -23,6 +23,7 @@ export const createUser = async (req) => {
 };
 
 export const generateJwt = async (user) => {
+  
   return jwt.sign(
     { _id: user._id.toString() ,email: user.email },
     process.env.JWT_SECRET,

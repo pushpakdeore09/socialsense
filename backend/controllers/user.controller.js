@@ -4,6 +4,7 @@ import userSchema from "../models/user.model.js";
 
 export const registerController = async (req, res) => {
   const errors = validationResult(req);
+  
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }

@@ -9,17 +9,40 @@ import {
   IconButton,
 } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
+import {registerUser} from "../api/authApi";
+import { toast } from "react-hot-toast";
+import {useNavigate} from 'react-router-dom'
 
 const Register = () => {
+    const navigate = useNavigate()
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(email, password);
+    const userData = {
+      firstName,
+      lastName,
+      email,
+      password,
+    };
+    try {
+        const response = await registerUser(userData);
+        console.log(response);
+        if (response.token){
+            localStorage.setItem('token', response.token)
+            toast.success("Registered Successfully")
+            navigate('/login')
+        }else{
+            toast.error("Some error occured!")
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
   };
   return (
     <section className="bg-gradient-to-br from-white to-green-50 py-20 px-4 min-h-screen flex items-center justify-center">
@@ -46,6 +69,7 @@ const Register = () => {
                   fullWidth
                   required
                   value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
               </div>
               <div className="w-1/2">
@@ -55,6 +79,7 @@ const Register = () => {
                   fullWidth
                   required
                   value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                 />
               </div>
             </div>
@@ -67,6 +92,7 @@ const Register = () => {
                 fullWidth
                 required
                 value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -77,6 +103,7 @@ const Register = () => {
                 fullWidth
                 required
                 value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type={showPassword ? "text" : "password"}
                 InputProps={{
                   endAdornment: (

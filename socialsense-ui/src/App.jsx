@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
+import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -10,6 +10,8 @@ import './App.css'
 function App() {
 
   return (
+    <>
+    <Toaster />
     <Router>
       <Routes>
         <Route path='/' element={<HomePage/>}/>
@@ -18,6 +20,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard/>}/>
       </Routes>
     </Router>
+    </>
   )
 }
 

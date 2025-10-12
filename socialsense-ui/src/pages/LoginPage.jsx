@@ -20,7 +20,7 @@ const Login = () => {
     console.log(email, password);
     
   }
-  
+
   return (
     <section className="bg-gradient-to-br from-white to-green-50 min-h-screen flex items-center justify-center px-4 py-20">
       <Container maxWidth="sm">
@@ -47,6 +47,7 @@ const Login = () => {
               fullWidth
               required
               value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
               label="Password"
@@ -55,6 +56,7 @@ const Login = () => {
               fullWidth
               required
               value={password}
+              onChange={(e) => setPassword(e.target.value)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
