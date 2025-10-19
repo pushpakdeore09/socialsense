@@ -31,9 +31,7 @@ const Register = () => {
     };
     try {
         const response = await registerUser(userData);
-        console.log(response);
-        if (response.token){
-            localStorage.setItem('token', response.token)
+        if (response.user){
             toast.success("Registered Successfully")
             navigate('/login')
         }else{

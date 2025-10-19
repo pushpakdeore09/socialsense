@@ -10,8 +10,7 @@ export const registerController = async (req, res) => {
   }
   try {
     const user = await userService.createUser(req);
-    const token = await userService.generateJwt(user);
-    return res.status(201).send({ user, token });
+    return res.status(201).send({ user});
   } catch (error) {
     return res.status(400).send(error.message);
   }

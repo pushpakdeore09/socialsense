@@ -9,17 +9,36 @@ import {
   IconButton,
 } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
+import { loginUser } from "../api/authApi";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../store/useAuth";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const login = useAuth.getState().login;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(email, password);
-    
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const userData = {
+      email,
+      password,
+    };
+    try {
+      const response = await loginUser(userData);
+      console.log(response);
+      if (response.token) {
+        login(response.user, response.token);
+        toast.success("Login Success!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <section className="bg-gradient-to-br from-white to-green-50 min-h-screen flex items-center justify-center px-4 py-20">

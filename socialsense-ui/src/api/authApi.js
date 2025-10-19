@@ -8,3 +8,12 @@ export const registerUser = async (userData) => {
     throw error.response?.data || error;
   }
 };
+
+export const loginUser = async (userData) => {
+  try {
+    const response = await apiClient.post("/auth/login", userData)
+    return response.data
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+}

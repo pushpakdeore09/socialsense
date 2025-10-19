@@ -14,7 +14,13 @@ import useAuth from "../store/useAuth";
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const isAuthenticated = useAuth((store) => store.isAuthenticated);
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const user = useAuth((state) => state.user); 
+
+  const initials = user
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : "";
+
   const navLinks = [
     { name: "Home", href: "#", active: true },
     { name: "About", href: "#", active: false },
@@ -71,24 +77,37 @@ const NavBar = () => {
               </Button>
             ))}
           </Box>
-
-          <Button
-            variant="contained"
-            className="bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 normal-case px-6 py-2 rounded-xl shadow-lg font-semibold text-sm transition-all duration-300 transform hover:scale-105"
-            sx={{
-              backgroundColor: "#4F7B7F",
-              "&:hover": {
-                background: "linear-gradient(90deg, #1D4D4F, #0E3A3B)",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                color: "#ffffff",
-              },
-            }}
-            onClick={() =>
-              isAuthenticated ? navigate("/dashboard") : navigate("/login")
-            }
-          >
-            Get Started
-          </Button>
+          {isAuthenticated && user ? (
+            <Box
+              className="flex items-center space-x-3 cursor-pointer"
+              onClick={() => navigate("/dashboard")}
+            >
+              <Avatar className="bg-teal-600 text-white w-10 h-10 font-sans">
+                {initials}
+              </Avatar>
+              <Typography className="text-white font-medium">
+                {user.firstName} {user.lastName}
+              </Typography>
+            </Box>
+          ) : (
+            <Button
+              variant="contained"
+              className="bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 normal-case px-6 py-2 rounded-xl shadow-lg font-semibold text-sm transition-all duration-300 transform hover:scale-105"
+              sx={{
+                backgroundColor: "#4F7B7F",
+                "&:hover": {
+                  background: "linear-gradient(90deg, #1D4D4F, #0E3A3B)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                  color: "#ffffff",
+                },
+              }}
+              onClick={() =>
+                isAuthenticated ? navigate("/dashboard") : navigate("/login")
+              }
+            >
+              Get Started
+            </Button>
+          )}
         </Toolbar>
       </Container>
     </AppBar>
