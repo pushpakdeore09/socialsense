@@ -4,6 +4,7 @@ const Dashboard = () => {
     return (
         <>
         <NavBar/>
+        <div>Dashboard</div>
         </>
     )
 }

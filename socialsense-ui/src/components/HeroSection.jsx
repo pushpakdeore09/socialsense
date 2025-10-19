@@ -115,7 +115,7 @@ const HeroSection = () => {
           {/* Image */}
           <Box
             component="img"
-            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80"
+            src="/images/homepage.png"
             alt="Illustration"
             sx={{
               flexShrink: 0,

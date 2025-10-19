@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -7,6 +7,11 @@ import {
   Typography,
   Button,
   Container,
+  Menu,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { BarChart3 } from "lucide-react";
@@ -15,7 +20,8 @@ import useAuth from "../store/useAuth";
 const NavBar = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
-  const user = useAuth((state) => state.user); 
+  const user = useAuth((state) => state.user);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const initials = user
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -28,6 +34,20 @@ const NavBar = () => {
     { name: "How It Works", href: "#", active: false },
     { name: "Contact", href: "#", active: false },
   ];
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget); 
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null); 
+  };
+
+  const handleLogout = () => {
+    useAuth.getState().logout(); 
+    setAnchorEl(null); 
+    navigate("/login"); 
+  };
 
   return (
     <AppBar
@@ -77,16 +97,17 @@ const NavBar = () => {
               </Button>
             ))}
           </Box>
+
           {isAuthenticated && user ? (
             <Box
               className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => navigate("/dashboard")}
+              onClick={handleMenuOpen}
             >
               <Avatar className="bg-teal-600 text-white w-10 h-10 font-sans">
                 {initials}
               </Avatar>
               <Typography className="text-white font-medium">
-                {user.firstName} {user.lastName}
+                {user.firstName.toUpperCase()} {user.lastName.toUpperCase()}
               </Typography>
             </Box>
           ) : (
@@ -110,6 +131,31 @@ const NavBar = () => {
           )}
         </Toolbar>
       </Container>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        sx={{
+          "& .MuiPaper-root": {
+            borderRadius: "8px",
+            backgroundColor: "#ffffff",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
+            maxHeight: "300px",
+            padding: 0,
+          },
+        }}
+      >
+        <List className="py-0">
+          <ListItem onClick={() => navigate("/dashboard")}>
+            <ListItemText primary="Dashboard" className="text-teal-600 cursor-pointer" />
+          </ListItem>
+
+          <ListItem onClick={handleLogout}>
+            <ListItemText primary="Logout" className="text-teal-600 cursor-pointer" />
+          </ListItem>
+        </List>
+      </Menu>
     </AppBar>
   );
 };
