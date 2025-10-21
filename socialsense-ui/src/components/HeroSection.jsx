@@ -1,14 +1,11 @@
 import React from "react";
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Stack,
-} from "@mui/material";
+import { Box, Container, Typography, Button, Stack } from "@mui/material";
 import { BarChart3, Info, Lock } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import useAuth from "../store/useAuth";
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
   return (
     <Box
       sx={{
@@ -25,10 +22,9 @@ const HeroSection = () => {
             justifyContent: "center",
             gap: 6,
             minHeight: { xs: 300, md: 400 },
-            flexWrap: "nowrap", // NO wrapping so always side-by-side
+            flexWrap: "nowrap",
           }}
         >
-          {/* Text content */}
           <Box
             sx={{
               flex: "1 1 50%",
@@ -55,8 +51,9 @@ const HeroSection = () => {
               mb={5}
               sx={{ lineHeight: 1.5 }}
             >
-              SocialSense uses advanced AI to analyze text patterns and identify potential
-              depression indicators, helping you take the first step toward mental wellness.
+              SocialSense uses advanced AI to analyze text patterns and identify
+              potential depression indicators, helping you take the first step
+              toward mental wellness.
             </Typography>
 
             <Stack
@@ -78,6 +75,9 @@ const HeroSection = () => {
                     bgcolor: "teal.dark",
                   },
                 }}
+                onClick={() => 
+                  isAuthenticated ? navigate("/dashboard") : navigate("/login")
+                }
               >
                 Start Analysis
               </Button>
@@ -94,6 +94,7 @@ const HeroSection = () => {
                     bgcolor: "grey.100",
                   },
                 }}
+                onClick={() => navigate('/more-info')}
               >
                 Learn More
               </Button>
