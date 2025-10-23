@@ -1,7 +1,13 @@
 import React, { useState, useRef } from "react";
-import { Button, Typography } from "@mui/material";
+import {
+  Button,
+  Typography,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import NavBar from "../components/NavBar";
-
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -11,53 +17,50 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-
+import toast from "react-hot-toast";
+import {firstStagePrediction} from '../api/analyseApi'
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Dashboard = () => {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [submissions, setSubmissions] = useState([]);
-
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
   const textareaRef = useRef(null);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!text.trim()) {
-      alert("Please enter some text");
+      toast.error("Please enter some text");
+      return;
+    }
+    if (!age) {
+      toast.error("Please enter age");
+      return;
+    }
+    if (!gender) {
+      toast.error("Please enter gender");
       return;
     }
 
     setLoading(true);
-    const submissionId = Date.now();
-    setSubmissions((prev) => [
-      ...prev,
-      { id: submissionId, userText: text, result: null, loading: true },
-    ]);
 
-    setText("");
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "40px"; 
+    try {
+      const data = {
+        "text": text,
+        "age": age,
+        "gender": gender,
+        "age_category": "Teen Age"
+      }
+      const response = await firstStagePrediction(data)
+      console.log(response);
+      
+    } catch (error) {
+      console.log(error);
+      
     }
-
-    setTimeout(() => {
-      const analysisData = {
-        depression: 60.9,
-        semanticAnalysis: 59.9,
-        writingStyle: 63.5,
-        psychological: 70.5,
-        metaLearner: 60.9,
-      };
-
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub.id === submissionId
-            ? { ...sub, result: analysisData, loading: false }
-            : sub
-        )
-      );
-      setLoading(false);
-    }, 1500);
+    setLoading(false);
+    
   };
 
   const handleChange = (e) => {
@@ -110,22 +113,16 @@ const Dashboard = () => {
         y: {
           beginAtZero: true,
           max: 100,
-          ticks: {
-            stepSize: 10,
-          },
+          ticks: { stepSize: 10 },
         },
       },
-      plugins: {
-        legend: {
-          display: false,
-        },
-      },
+      plugins: { legend: { display: false } },
     };
 
     return (
       <div
         key={id}
-        className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4 mb-6"
+        className="w-full bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4"
       >
         <div className="bg-teal-100 text-teal-900 p-3 rounded-md whitespace-pre-wrap">
           <Typography variant="body1">{userText}</Typography>
@@ -140,7 +137,7 @@ const Dashboard = () => {
         {result && (
           <>
             <Typography variant="h6" className="text-red-500">
-             Depression Detected
+              Depression Detected
             </Typography>
 
             <div className="flex justify-between">
@@ -206,40 +203,78 @@ const Dashboard = () => {
     <>
       <NavBar />
 
-      <div className="flex-1 bg-gray-100 px-4 h-[calc(100vh-64px)] flex flex-col">
-        <div className="flex-1 overflow-y-auto flex flex-col gap-6 pb-4">
-          {submissions.map((submission) => renderSubmission(submission))}
+      <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col items-center">
+        {/* Scrollable Results Section */}
+        <div className="w-full flex-1 overflow-y-auto flex flex-col items-center py-6 px-4">
+          <div className="w-full max-w-4xl flex flex-col gap-6">
+            {submissions.map((submission) => renderSubmission(submission))}
+          </div>
         </div>
 
-        <div className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-xl p-4 flex flex-col mb-6 gap-4 sticky bottom-0 z-10">
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleChange}
-            placeholder="Type something to analyze..."
-            rows={1}
-            className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400"
-            style={{
-              minHeight: "60px",
-              maxHeight: "300px",
-              height: "auto",
-              overflow: "hidden",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-            disabled={loading}
-          />
-
-          <div className="flex justify-end">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAnalyze}
-              className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-md"
+        {/* Input Section - perfectly aligned and spaced */}
+        <div className="w-full flex justify-center mb-6 px-4">
+          <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4">
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleChange}
+              placeholder="Type something to analyze..."
+              rows={1}
+              className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 chat-input"
+              style={{
+                minHeight: "60px",
+                maxHeight: "300px",
+                height: "auto",
+                overflow: "hidden",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
               disabled={loading}
-            >
-              {loading ? "Analyzing..." : "Analyze Text"}
-            </Button>
+            />
+
+            <div className="flex justify-between mt-4 items-center flex-wrap gap-4">
+              <div className="flex gap-4">
+                <FormControl variant="outlined" size="small" className="w-32">
+                  <InputLabel>Age</InputLabel>
+                  <Select
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    label="Age"
+                    disabled={loading}
+                  >
+                    <MenuItem value={13}>13</MenuItem>
+                    <MenuItem value={14}>14</MenuItem>
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
+                    <MenuItem value={17}>17</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl variant="outlined" size="small" className="w-32">
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    label="Gender"
+                    disabled={loading}
+                  >
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAnalyze}
+                className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-md"
+                disabled={loading}
+              >
+                {loading ? "Analyzing..." : "Analyze Text"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

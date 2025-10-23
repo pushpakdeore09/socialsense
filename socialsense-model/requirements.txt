@@ -6,3 +6,6 @@ numpy
 pandas
 scipy
 pydantic
+textblob
+sentence-transformers
+tf-keras

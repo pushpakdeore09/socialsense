@@ -1,8 +1,7 @@
 import pickle
 from pathlib import Path
 import xgboost as xgb  # type: ignore
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sentence_transformers import SentenceTransformer # type: ignore
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -17,10 +16,8 @@ def load_pickle(filename):
     with open(path, "rb") as f:
         return pickle.load(f)
 
-# Load trained XGBoost model
 xgb_model = load_model()
-
-# Load fitted transformers
 tfidf = load_pickle("bin_tfidf.pkl")         
 encoder = load_pickle("bin_encoder.pkl")     
-scaler = load_pickle("bin_scaler.pkl")       
+scaler = load_pickle("bin_scaler.pkl")   
+sbert_model = SentenceTransformer('all-MiniLM-L6-v2')   
