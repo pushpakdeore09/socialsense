@@ -22,3 +22,7 @@ export const firstStagePrediction = async (data) => {
     throw error.response?.data || error;
   }
 };
+
+export const saveAnalysis = async (data) => {
+  
+}

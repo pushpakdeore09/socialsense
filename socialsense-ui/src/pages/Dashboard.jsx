@@ -8,59 +8,49 @@ import {
   FormControl,
 } from "@mui/material";
 import NavBar from "../components/NavBar";
-import { Bar } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
+  ArcElement,
   Tooltip,
   Legend,
 } from "chart.js";
 import toast from "react-hot-toast";
-import {firstStagePrediction} from '../api/analyseApi'
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+import { firstStagePrediction } from "../api/analyseApi";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard = () => {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submissions, setSubmissions] = useState([]);
+  const [result, setResult] = useState(null);
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const textareaRef = useRef(null);
 
   const handleAnalyze = async () => {
-    if (!text.trim()) {
-      toast.error("Please enter some text");
-      return;
-    }
-    if (!age) {
-      toast.error("Please enter age");
-      return;
-    }
-    if (!gender) {
-      toast.error("Please enter gender");
-      return;
-    }
+    if (!text.trim()) return toast.error("Please enter some text");
+    if (!age) return toast.error("Please select age");
+    if (!gender) return toast.error("Please select gender");
 
     setLoading(true);
-
     try {
       const data = {
-        "text": text,
-        "age": age,
-        "gender": gender,
-        "age_category": "Teen Age"
-      }
-      const response = await firstStagePrediction(data)
+        text,
+        age,
+        gender,
+        age_category: "Teen Age",
+      };
+
+      const response = await firstStagePrediction(data);
       console.log(response);
-      
+      setResult(response);
     } catch (error) {
-      console.log(error);
-      
+      console.error(error);
+      toast.error("Something went wrong while analyzing.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    
   };
 
   const handleChange = (e) => {
@@ -73,128 +63,83 @@ const Dashboard = () => {
     }
   };
 
-  const renderSubmission = (submission) => {
-    const { id, userText, result, loading } = submission;
+  const renderResult = () => {
+    if (!result) return null;
 
-    const chartData = result && {
-      labels: [
-        "Depression",
-        "Semantic Analysis",
-        "Writing Style",
-        "Psychological",
-        "Meta-Learner",
-      ],
+    const isDepressed = result.prediction === 1;
+    const confidencePercent = (result.confidence * 100).toFixed(2);
+
+    const pieData = {
+      labels: ["Confidence", "Remaining"],
       datasets: [
         {
-          label: "Score (%)",
-          data: [
-            result.depression,
-            result.semanticAnalysis,
-            result.writingStyle,
-            result.psychological,
-            result.metaLearner,
-          ],
-          backgroundColor: [
-            "#EF4444",
-            "#3B82F6",
-            "#10B981",
-            "#F59E0B",
-            "#6366F1",
-          ],
-          borderRadius: 6,
-          barThickness: 30,
+          data: [confidencePercent, 100 - confidencePercent],
+          backgroundColor: isDepressed
+            ? ["#EF4444", "#FCA5A5"] 
+            : ["#10B981", "#A7F3D0"], 
+          borderWidth: 1,
         },
       ],
     };
 
-    const chartOptions = {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          ticks: { stepSize: 10 },
+    const pieOptions = {
+      plugins: {
+        legend: {
+          display: true,
+          position: "bottom",
         },
       },
-      plugins: { legend: { display: false } },
     };
 
     return (
-      <div
-        key={id}
-        className="w-full bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4"
-      >
-        <div className="bg-teal-100 text-teal-900 p-3 rounded-md whitespace-pre-wrap">
-          <Typography variant="body1">{userText}</Typography>
+      <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 flex flex-col gap-6 mt-8 mb-28">
+        <Typography variant="h5" className="text-gray-800 font-semibold">
+          Stage 1 Result
+        </Typography>
+
+        {/* Typed Text */}
+        <div className="bg-teal-50 p-3 rounded-md">
+          <Typography variant="subtitle2" className="text-gray-500">
+            Typed Text:
+          </Typography>
+          <Typography
+            variant="body1"
+            className="text-gray-700 whitespace-pre-wrap"
+          >
+            {text}
+          </Typography>
         </div>
 
-        {loading && (
-          <Typography variant="body2" color="textSecondary" className="italic">
-            Analyzing...
+        {/* Age and Gender */}
+        <div className="flex gap-6 text-gray-700">
+          <Typography variant="body1">
+            <strong>Age:</strong> {age}
           </Typography>
-        )}
+          <Typography variant="body1">
+            <strong>Gender:</strong>{" "}
+            {gender.charAt(0).toUpperCase() + gender.slice(1)}
+          </Typography>
+        </div>
 
-        {result && (
-          <>
-            <Typography variant="h6" className="text-red-500">
-              Depression Detected
-            </Typography>
+        {/* Prediction */}
+        <div className="flex flex-col items-center justify-center mt-4">
+          <Typography
+            variant="h6"
+            className={`font-semibold ${
+              isDepressed ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {isDepressed ? "Depression Detected" : "No Depression Detected"}
+          </Typography>
 
-            <div className="flex justify-between">
-              <Typography variant="body1" className="text-gray-600">
-                Confidence Score:
-              </Typography>
-              <Typography variant="body1" className="text-teal-500">
-                {result.depression}%
-              </Typography>
-            </div>
+          <div className="w-48 h-48 mt-4">
+            <Pie data={pieData} options={pieOptions} />
+          </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1 p-3 border border-gray-300 rounded-md">
-                <Typography variant="body2" className="text-gray-500">
-                  Semantic Analysis
-                </Typography>
-                <Typography variant="body2" className="text-teal-500">
-                  {result.semanticAnalysis}%
-                </Typography>
-              </div>
-              <div className="flex-1 p-3 border border-gray-300 rounded-md">
-                <Typography variant="body2" className="text-gray-500">
-                  Writing Style
-                </Typography>
-                <Typography variant="body2" className="text-teal-500">
-                  {result.writingStyle}%
-                </Typography>
-              </div>
-            </div>
-
-            <div className="flex gap-4 mt-4">
-              <div className="flex-1 p-3 border border-gray-300 rounded-md">
-                <Typography variant="body2" className="text-gray-500">
-                  Psychological
-                </Typography>
-                <Typography variant="body2" className="text-teal-500">
-                  {result.psychological}%
-                </Typography>
-              </div>
-              <div className="flex-1 p-3 border border-gray-300 rounded-md">
-                <Typography variant="body2" className="text-gray-500">
-                  Meta-Learner
-                </Typography>
-                <Typography variant="body2" className="text-teal-500">
-                  {result.metaLearner}%
-                </Typography>
-              </div>
-            </div>
-
-            <div className="w-full mt-6">
-              <Typography variant="h6" className="mb-4 text-gray-700">
-                Analysis Breakdown (Bar Graph)
-              </Typography>
-              <Bar data={chartData} options={chartOptions} />
-            </div>
-          </>
-        )}
+          <Typography variant="body1" className="mt-2 text-gray-700">
+            Confidence: {confidencePercent}%
+          </Typography>
+        </div>
       </div>
     );
   };
@@ -202,17 +147,14 @@ const Dashboard = () => {
   return (
     <>
       <NavBar />
-
-      <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col items-center">
-        {/* Scrollable Results Section */}
-        <div className="w-full flex-1 overflow-y-auto flex flex-col items-center py-6 px-4">
-          <div className="w-full max-w-4xl flex flex-col gap-6">
-            {submissions.map((submission) => renderSubmission(submission))}
-          </div>
+      <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col items-center relative">
+        {/* Results Section */}
+        <div className="flex-1 w-full overflow-y-auto flex flex-col items-center px-4 mt-6 pb-48">
+          {renderResult()}
         </div>
 
-        {/* Input Section - perfectly aligned and spaced */}
-        <div className="w-full flex justify-center mb-6 px-4">
+        {/* Input Section (sticky at bottom with gap) */}
+        <div className="w-full flex justify-center px-4 sticky bottom-4 z-10">
           <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4">
             <textarea
               ref={textareaRef}
@@ -220,7 +162,7 @@ const Dashboard = () => {
               onChange={handleChange}
               placeholder="Type something to analyze..."
               rows={1}
-              className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 chat-input"
+              className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400"
               style={{
                 minHeight: "60px",
                 maxHeight: "300px",
@@ -260,7 +202,6 @@ const Dashboard = () => {
                   >
                     <MenuItem value="male">Male</MenuItem>
                     <MenuItem value="female">Female</MenuItem>
-                    <MenuItem value="other">Other</MenuItem>
                   </Select>
                 </FormControl>
               </div>

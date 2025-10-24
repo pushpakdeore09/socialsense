@@ -1,26 +1,22 @@
 import mongoose from "mongoose";
 
-const analysisSchema = new mongoose.Schema(
+const stage1Schema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    date: {
-      type: Date,
-      default: Date.now,
-      required: true,
-    },
-    text: {
-      type: String,
-      required: true,
-    },
     prediction: {
       type: Number,
-      enum: [1, 0],
+      enum: [0, 1],
       required: true,
     },
+    confidence: {
+      type: Number,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+const stage2Schema = new mongoose.Schema(
+  {
     depressionType: {
       type: String,
       enum: [
@@ -42,9 +38,43 @@ const analysisSchema = new mongoose.Schema(
       none: { type: Number, default: 0 },
     },
   },
+  { timestamps: true, _id: false }
+);
+
+const analysisSchema = new mongoose.Schema(
   {
-    timestamps: true,
-  }
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    text: {
+      type: String,
+      required: true,
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      required: true,
+    },
+    stage1: {
+      type: stage1Schema,
+      required: true,
+    },
+    stage2: {
+      type: stage2Schema,
+      default: null, 
+    },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { timestamps: true } 
 );
 
 const Analysis = mongoose.model("Analysis", analysisSchema);

@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import {dbConnect} from './db/db.js'
 import userRoutes from './routes/user.routes.js'
+import analysisRoutes from './routes/analysis.routes.js';
 
 dotenv.config()
 
@@ -16,6 +17,7 @@ dbConnect()
 const PORT = process.env.PORT || 5000
 
 app.use("/api/auth", userRoutes)
+app.use("/api/analysis", analysisRoutes)
 
 app.get('/', (req, res) => {
     res.send("Server Up")
