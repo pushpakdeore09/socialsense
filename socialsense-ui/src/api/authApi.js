@@ -1,4 +1,6 @@
-import backendApiClient from "./apiClient";
+import apiClient from "./apiClient";
+
+const { backendApiClient } = apiClient;
 
 export const registerUser = async (userData) => {
   try {

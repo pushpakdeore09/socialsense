@@ -9,18 +9,16 @@ import {
 } from "@mui/material";
 import NavBar from "../components/NavBar";
 import { Pie } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import toast from "react-hot-toast";
-import { firstStagePrediction } from "../api/analyseApi";
+import { firstStagePrediction, saveAnalysis } from "../api/analyseApi";
+import useAuth from "../store/useAuth";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard = () => {
+  const user = useAuth((state) => state.user);
+  const token = useAuth((state) => state.token);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -35,16 +33,22 @@ const Dashboard = () => {
 
     setLoading(true);
     try {
-      const data = {
+      const data = { text, age, gender, age_category: "Teen Age" };
+
+      const response = await firstStagePrediction(data);
+      setResult(response); 
+
+      const analysisData = {
+        userId: user?._id,
         text,
         age,
         gender,
-        age_category: "Teen Age",
+        stage1: response, 
+        stage2: null,
       };
 
-      const response = await firstStagePrediction(data);
-      console.log(response);
-      setResult(response);
+      await saveAnalysis(analysisData, token);
+      console.log("Analysis saved successfully");
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while analyzing.");
@@ -75,8 +79,8 @@ const Dashboard = () => {
         {
           data: [confidencePercent, 100 - confidencePercent],
           backgroundColor: isDepressed
-            ? ["#EF4444", "#FCA5A5"] 
-            : ["#10B981", "#A7F3D0"], 
+            ? ["#EF4444", "#FCA5A5"]
+            : ["#10B981", "#A7F3D0"],
           borderWidth: 1,
         },
       ],
@@ -97,7 +101,6 @@ const Dashboard = () => {
           Stage 1 Result
         </Typography>
 
-        {/* Typed Text */}
         <div className="bg-teal-50 p-3 rounded-md">
           <Typography variant="subtitle2" className="text-gray-500">
             Typed Text:
@@ -106,11 +109,10 @@ const Dashboard = () => {
             variant="body1"
             className="text-gray-700 whitespace-pre-wrap"
           >
-            {text}
+            {result.text}
           </Typography>
         </div>
 
-        {/* Age and Gender */}
         <div className="flex gap-6 text-gray-700">
           <Typography variant="body1">
             <strong>Age:</strong> {age}
@@ -121,7 +123,6 @@ const Dashboard = () => {
           </Typography>
         </div>
 
-        {/* Prediction */}
         <div className="flex flex-col items-center justify-center mt-4">
           <Typography
             variant="h6"
@@ -148,12 +149,10 @@ const Dashboard = () => {
     <>
       <NavBar />
       <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col items-center relative">
-        {/* Results Section */}
         <div className="flex-1 w-full overflow-y-auto flex flex-col items-center px-4 mt-6 pb-48">
           {renderResult()}
         </div>
 
-        {/* Input Section (sticky at bottom with gap) */}
         <div className="w-full flex justify-center px-4 sticky bottom-4 z-10">
           <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-4 flex flex-col gap-4">
             <textarea

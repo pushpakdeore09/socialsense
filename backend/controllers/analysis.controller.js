@@ -24,9 +24,10 @@ export const saveAnalysisResult = async (req, res) => {
   }
 };
 
-export const getUserAnalyses = async () => {
+export const getUserAnalyses = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const {userId}  = req.params;
+    
     if (!userId) {
       return res.status(400).json({ message: "userId is required" });
     }
@@ -39,3 +40,18 @@ export const getUserAnalyses = async () => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const deleteUserAnalysis = async (req, res) => {
+  try {
+    const { analysisId } = req.params; 
+    
+
+    const result = await analysisService.deleteUserAnalysisService(analysisId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+

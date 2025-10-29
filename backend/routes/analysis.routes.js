@@ -11,7 +11,13 @@ router.post(
 router.get(
   "/user/:userId",
   authMiddleware.authUser,
-  analysisController.saveAnalysisResult
+  analysisController.getUserAnalyses
+);
+
+router.delete(
+  "/delete-analysis/:analysisId",
+  authMiddleware.authUser,
+  analysisController.deleteUserAnalysis
 );
 
 export default router;

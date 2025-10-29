@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../components/NavBar";
 import {
   Table,
@@ -10,8 +10,10 @@ import {
   Paper,
   Button,
   Typography,
+  CircularProgress,
 } from "@mui/material";
-
+import useAuth from "../store/useAuth";
+import { getUserAnalyses, deleteUserAnalysis } from "../api/analyseApi";
 const analysisData = [
   {
     date: "10/21/2025",
@@ -30,11 +32,47 @@ const analysisData = [
 ];
 
 const History = () => {
+  const token = useAuth((state) => state.token);
+  const user = useAuth((state) => state.user);
+  const [analysisData, setAnalysisData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleDelete = async (analysisId) => {
+    try {
+      await deleteUserAnalysis(analysisId, token);
+      setAnalysisData((prevData) =>
+        prevData.filter((analysis) => analysis._id !== analysisId)
+      );
+    } catch (error) {
+      console.error("Failed to delete analysis:", error);
+    }
+  };
+  useEffect(() => {
+    const fetchUserAnalysis = async () => {
+      try {
+        const response = await getUserAnalyses(user._id, token);
+        setAnalysisData(response);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserAnalysis();
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <>
       <NavBar />
       <div className="p-6 bg-white min-h-screen">
-        {/* Container to align heading and table */}
         <div className="mx-auto max-w-6xl">
           <Typography
             variant="h5"
@@ -106,17 +144,37 @@ const History = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {analysisData.map(
-                  (
-                    { date, textPreview, prediction, category, confidence },
-                    index
-                  ) => (
+                {analysisData.map((item, index) => {
+                  const formattedDate = new Date(item.date).toLocaleDateString(
+                    "en-GB"
+                  );
+
+                  const prediction =
+                    item.stage1?.prediction === 1
+                      ? "Depressed"
+                      : "Not Depressed";
+
+                  const confidence = item.stage1
+                    ? `${(item.stage1.confidence * 100).toFixed(1)}%`
+                    : "-";
+
+                  const category = item.stage2
+                    ? item.stage2.category || "N/A"
+                    : "-";
+
+                  const textPreview =
+                    item.text.length > 50
+                      ? item.text.slice(0, 50) + "..."
+                      : item.text;
+
+                  return (
                     <TableRow key={index}>
                       <TableCell
                         sx={{ color: "#134e4a", fontWeight: "medium" }}
                       >
-                        {date}
+                        {formattedDate}
                       </TableCell>
+
                       <TableCell
                         sx={{
                           color: "#134e4a",
@@ -125,10 +183,11 @@ const History = () => {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
-                        title={textPreview}
+                        title={item.text}
                       >
                         {textPreview}
                       </TableCell>
+
                       <TableCell
                         sx={{
                           color:
@@ -138,14 +197,17 @@ const History = () => {
                       >
                         {prediction}
                       </TableCell>
+
                       <TableCell
                         sx={{ color: "#0c4a6e", fontWeight: "medium" }}
                       >
                         {category}
                       </TableCell>
+
                       <TableCell sx={{ color: "#134e4a" }}>
                         {confidence}
                       </TableCell>
+
                       <TableCell>
                         <Button
                           variant="contained"
@@ -167,13 +229,14 @@ const History = () => {
                             backgroundColor: "#0284c7",
                             "&:hover": { backgroundColor: "#0369a1" },
                           }}
+                          onClick={() => handleDelete(item._id)}
                         >
                           Delete
                         </Button>
                       </TableCell>
                     </TableRow>
-                  )
-                )}
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
