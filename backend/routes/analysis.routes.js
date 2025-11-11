@@ -20,4 +20,5 @@ router.delete(
   analysisController.deleteUserAnalysis
 );
 
+router.get("/get-analysis/:analysisId", authMiddleware.authUser, analysisController.getAnalysisById)
 export default router;

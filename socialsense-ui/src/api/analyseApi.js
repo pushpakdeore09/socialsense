@@ -63,16 +63,31 @@ export const getUserAnalyses = async (userId, token) => {
 };
 
 export const deleteUserAnalysis = async (analysisId, token) => {
-  
   try {
     const response = await backendApiClient.delete(
-    `/analysis/delete-analysis/${analysisId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+      `/analysis/delete-analysis/${analysisId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAnalysis = async (analysisId, token) => {
+  try {
+    const response = await backendApiClient.get(
+      `/analysis/get-analysis/${analysisId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }

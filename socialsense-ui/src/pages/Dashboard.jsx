@@ -36,19 +36,21 @@ const Dashboard = () => {
       const data = { text, age, gender, age_category: "Teen Age" };
 
       const response = await firstStagePrediction(data);
-      setResult(response); 
 
       const analysisData = {
         userId: user?._id,
         text,
         age,
         gender,
-        stage1: response, 
+        stage1: response,
         stage2: null,
       };
 
-      await saveAnalysis(analysisData, token);
-      console.log("Analysis saved successfully");
+      const response2 = await saveAnalysis(analysisData, token);
+      console.log(response2);
+      
+      if (response2) setResult(response2);
+      console.log(result);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while analyzing.");
@@ -70,8 +72,8 @@ const Dashboard = () => {
   const renderResult = () => {
     if (!result) return null;
 
-    const isDepressed = result.prediction === 1;
-    const confidencePercent = (result.confidence * 100).toFixed(2);
+    const isDepressed = result.stage1.prediction === 1;
+    const confidencePercent = (result.stage1.confidence * 100).toFixed(2);
 
     const pieData = {
       labels: ["Confidence", "Remaining"],
@@ -115,11 +117,11 @@ const Dashboard = () => {
 
         <div className="flex gap-6 text-gray-700">
           <Typography variant="body1">
-            <strong>Age:</strong> {age}
+            <strong>Age:</strong> {result.age}
           </Typography>
           <Typography variant="body1">
             <strong>Gender:</strong>{" "}
-            {gender.charAt(0).toUpperCase() + gender.slice(1)}
+            {gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : "N/A"}
           </Typography>
         </div>
 

@@ -49,9 +49,20 @@ export const deleteUserAnalysis = async (req, res) => {
     const result = await analysisService.deleteUserAnalysisService(analysisId);
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
     
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
+export const getAnalysisById = async (req, res) => {
+  try {
+    const {analysisId} = req.params;
+    console.log(analysisId);
+    
+    const result = await analysisService.getAnalysis(analysisId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+
+}

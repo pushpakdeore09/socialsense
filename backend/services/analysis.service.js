@@ -30,3 +30,12 @@ export const deleteUserAnalysisService = async (analysisId) => {
 
   return { message: "Analysis deleted successfully" };
 };
+
+export const getAnalysis = async (analysisId) => {
+  
+  const analysis = await Analysis.findById(analysisId);
+  if(!analysis){
+    throw new Error("Analysis not found");
+  }
+  return analysis;
+}

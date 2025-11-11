@@ -13,7 +13,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import useAuth from "../store/useAuth";
-import { getUserAnalyses, deleteUserAnalysis } from "../api/analyseApi";
+import {
+  getUserAnalyses,
+  deleteUserAnalysis,
+  getAnalysis,
+} from "../api/analyseApi";
+import AnalysisViewModal from '../components/AnalysisViewModal';
 const analysisData = [
   {
     date: "10/21/2025",
@@ -36,7 +41,8 @@ const History = () => {
   const user = useAuth((state) => state.user);
   const [analysisData, setAnalysisData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const handleDelete = async (analysisId) => {
     try {
       await deleteUserAnalysis(analysisId, token);
@@ -45,6 +51,16 @@ const History = () => {
       );
     } catch (error) {
       console.error("Failed to delete analysis:", error);
+    }
+  };
+  const handleView = async (analysisId) => {
+    try {
+      const response = await getAnalysis(analysisId, token);
+      setSelectedAnalysis(response);
+      setModalOpen(true);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
   };
   useEffect(() => {
@@ -218,6 +234,7 @@ const History = () => {
                             backgroundColor: "#0f766e",
                             "&:hover": { backgroundColor: "#115e59" },
                           }}
+                          onClick={() => handleView(item._id)}
                         >
                           View
                         </Button>
@@ -242,6 +259,11 @@ const History = () => {
           </TableContainer>
         </div>
       </div>
+      <AnalysisViewModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        analysis={selectedAnalysis}
+      />
     </>
   );
 };
