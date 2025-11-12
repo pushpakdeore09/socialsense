@@ -8,7 +8,6 @@ from app.model.load_model import xgb_model, tokenizer, bert_model, scaler, label
 router = APIRouter()
 
 def get_bert_embeddings(text: str):
-    """Extracts [CLS] token embedding from BERT."""
     inputs = tokenizer(
         text,
         padding=True,
