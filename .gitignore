@@ -12,3 +12,5 @@ bm2/
 meta_model/
 __pycache__/
 *.pyc
+
+.env
