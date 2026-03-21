@@ -1,10 +1,9 @@
-import apiClient from "./apiClient";
+import {apiClient} from "./apiClient";
 
-const { backendApiClient } = apiClient;
 
 export const registerUser = async (userData) => {
   try {
-    const response = await backendApiClient.post("/auth/register", userData);
+    const response = await apiClient.post("/auth/register", userData);
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
@@ -13,7 +12,7 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (userData) => {
   try {
-    const response = await backendApiClient.post("/auth/login", userData)
+    const response = await apiClient.post("/auth/login", userData)
     return response.data
   } catch (error) {
     throw error.response?.data || error;

@@ -40,6 +40,45 @@ const stage2Schema = new mongoose.Schema(
   },
   { timestamps: true, _id: false }
 );
+const emergencySupportSchema = new mongoose.Schema(
+  {
+    message: {
+      type: String,
+      default: "",
+    },
+    helplines: {
+      type: [String],
+      default: [],
+    },
+    emergency_number: {
+      type: String,
+      default: "",
+    },
+  },
+  { _id: false }
+);
+
+const recommendationSchema = new mongoose.Schema(
+  {
+    recommendations: {
+      type: [String],
+      default: [],
+    },
+    lifestyle_suggestions: {
+      type: [String],
+      default: [],
+    },
+    encouraging_message: {
+      type: String,
+      default: "",
+    },
+    emergency_support: {
+      type: emergencySupportSchema,
+      default: null, 
+    },
+  },
+  { _id: false }
+);
 
 const analysisSchema = new mongoose.Schema(
   {
@@ -52,8 +91,8 @@ const analysisSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    age: {
-      type: Number,
+    age_group: {
+      type: String,
       required: true,
     },
     gender: {
@@ -67,15 +106,20 @@ const analysisSchema = new mongoose.Schema(
     },
     stage2: {
       type: stage2Schema,
-      default: null, 
+      default: null,
+    },
+    recommendation: {
+      type: recommendationSchema,
+      default: null,
     },
     date: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
 const Analysis = mongoose.model("Analysis", analysisSchema);
+
 export default Analysis;

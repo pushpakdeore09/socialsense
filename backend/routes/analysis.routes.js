@@ -4,9 +4,9 @@ import * as authMiddleware from "../middleware/auth.middleware.js";
 const router = Router();
 
 router.post(
-  "/save-analysis",
+  "/save-analysis/stage-one",
   authMiddleware.authUser,
-  analysisController.saveAnalysisResult
+  analysisController.saveStage1AnalysisResult
 );
 router.get(
   "/user/:userId",
@@ -21,4 +21,12 @@ router.delete(
 );
 
 router.get("/get-analysis/:analysisId", authMiddleware.authUser, analysisController.getAnalysisById)
+
+router.post(
+  "/save-analysis/stage-two",
+  authMiddleware.authUser,
+  analysisController.saveStage2AnalysisResult
+);
+
+router.post("/stage-two", analysisController.saveStageTwo)
 export default router;

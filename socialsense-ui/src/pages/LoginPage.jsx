@@ -29,7 +29,6 @@ const Login = () => {
     };
     try {
       const response = await loginUser(userData);
-      console.log(response);
       if (response.token) {
         login(response.user, response.token);
         toast.success("Login Success!");

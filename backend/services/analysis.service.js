@@ -1,12 +1,12 @@
 import Analysis from "../models/analysis.model.js";
 
 export const createAnalysis = async (data) => {
-  const { userId, text, age, gender, stage1, stage2 } = data;
-
+  const { userId, text, age_group, gender, stage1, stage2 } = data;
+  
   const analysis = new Analysis({
     userId,
     text,
-    age,
+    age_group,
     gender,
     stage1,
     stage2: stage2 || undefined,
@@ -32,10 +32,9 @@ export const deleteUserAnalysisService = async (analysisId) => {
 };
 
 export const getAnalysis = async (analysisId) => {
-  
   const analysis = await Analysis.findById(analysisId);
-  if(!analysis){
+  if (!analysis) {
     throw new Error("Analysis not found");
   }
   return analysis;
-}
+};

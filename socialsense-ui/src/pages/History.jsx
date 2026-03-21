@@ -18,23 +18,11 @@ import {
   deleteUserAnalysis,
   getAnalysis,
 } from "../api/analyseApi";
-import AnalysisViewModal from '../components/AnalysisViewModal';
-const analysisData = [
-  {
-    date: "10/21/2025",
-    textPreview: "I had such a wonderful day today! The weather was ...",
-    prediction: "Not Depressed",
-    category: "Positive",
-    confidence: "28.2%",
-  },
-  {
-    date: "10/21/2025",
-    textPreview: "I feel so empty inside lately. Nothing seems to ma...",
-    prediction: "Depressed",
-    category: "Negative",
-    confidence: "60.9%",
-  },
-];
+import AnalysisViewModal from "../components/AnalysisViewModal";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const History = () => {
   const token = useAuth((state) => state.token);
@@ -43,30 +31,34 @@ const History = () => {
   const [loading, setLoading] = useState(true);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+
   const handleDelete = async (analysisId) => {
     try {
       await deleteUserAnalysis(analysisId, token);
       setAnalysisData((prevData) =>
-        prevData.filter((analysis) => analysis._id !== analysisId)
+        prevData.filter((analysis) => analysis._id !== analysisId),
       );
     } catch (error) {
       console.error("Failed to delete analysis:", error);
     }
   };
+
   const handleView = async (analysisId) => {
     try {
       const response = await getAnalysis(analysisId, token);
       setSelectedAnalysis(response);
       setModalOpen(true);
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     const fetchUserAnalysis = async () => {
       try {
         const response = await getUserAnalyses(user._id, token);
+        console.log(response);
+
         setAnalysisData(response);
       } catch (error) {
         console.log(error);
@@ -88,6 +80,7 @@ const History = () => {
   return (
     <>
       <NavBar />
+
       <div className="p-6 bg-white min-h-screen">
         <div className="mx-auto max-w-6xl">
           <Typography
@@ -148,6 +141,26 @@ const History = () => {
                   >
                     Confidence
                   </TableCell>
+
+                  <TableCell
+                    sx={{
+                      color: "#0284c7",
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    Age Group
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "#0284c7",
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    Gender
+                  </TableCell>
+
                   <TableCell
                     sx={{
                       color: "#0284c7",
@@ -159,10 +172,11 @@ const History = () => {
                   </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {analysisData.map((item, index) => {
                   const formattedDate = new Date(item.date).toLocaleDateString(
-                    "en-GB"
+                    "en-GB",
                   );
 
                   const prediction =
@@ -175,13 +189,16 @@ const History = () => {
                     : "-";
 
                   const category = item.stage2
-                    ? item.stage2.category || "N/A"
+                    ? item.stage2.depressionType || "N/A"
                     : "-";
 
                   const textPreview =
                     item.text.length > 50
                       ? item.text.slice(0, 50) + "..."
                       : item.text;
+
+                  const age = item.age_group ?? "N/A";
+                  const gender = item.gender ?? "N/A";
 
                   return (
                     <TableRow key={index}>
@@ -224,32 +241,58 @@ const History = () => {
                         {confidence}
                       </TableCell>
 
+                      <TableCell sx={{ color: "#134e4a" }}>{age}</TableCell>
+
+                      <TableCell
+                        sx={{ color: "#134e4a", textTransform: "capitalize" }}
+                      >
+                        {gender}
+                      </TableCell>
+
                       <TableCell>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          sx={{
-                            mr: 1,
-                            textTransform: "none",
-                            backgroundColor: "#0f766e",
-                            "&:hover": { backgroundColor: "#115e59" },
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                            alignItems: "center",
                           }}
-                          onClick={() => handleView(item._id)}
                         >
-                          View
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          sx={{
-                            textTransform: "none",
-                            backgroundColor: "#0284c7",
-                            "&:hover": { backgroundColor: "#0369a1" },
-                          }}
-                          onClick={() => handleDelete(item._id)}
-                        >
-                          Delete
-                        </Button>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Tooltip title="View">
+                              <IconButton
+                                onClick={() => handleView(item._id)}
+                                sx={{
+                                  color: "#0f766e",
+                                  "&:hover": {
+                                    backgroundColor: "#ccfbf1",
+                                  },
+                                }}
+                              >
+                                <VisibilityIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Delete">
+                              <IconButton
+                                onClick={() => handleDelete(item._id)}
+                                sx={{
+                                  color: "#0284c7",
+                                  "&:hover": {
+                                    backgroundColor: "#e0f2fe",
+                                  },
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -259,6 +302,7 @@ const History = () => {
           </TableContainer>
         </div>
       </div>
+
       <AnalysisViewModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

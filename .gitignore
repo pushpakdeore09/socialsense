@@ -1,0 +1,14 @@
+*.pt
+*.h5
+*.pkl
+*.bin
+*.keras
+*.joblib
+*.safetensors
+
+binary_model/
+bm1/
+bm2/
+meta_model/
+__pycache__/
+*.pyc

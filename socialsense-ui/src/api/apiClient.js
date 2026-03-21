@@ -1,18 +1,23 @@
 import axios from 'axios';
 
-const backendApiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: 'http://localhost:5000/api/',
   headers: {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${localStorage.getItem('token')}`,
   }
 });
 
-const mlModelApiClient = axios.create({
+export const mlModelApiClient = axios.create({
   baseURL: 'http://127.0.0.1:8000/predict/',
   headers: {
     "Content-Type": "application/json",
   }
 });
 
-export default { backendApiClient, mlModelApiClient };
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});

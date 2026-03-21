@@ -1,13 +1,25 @@
 from pydantic import BaseModel # type: ignore
-from typing import List
+from typing import List, Dict, Any
 
-class PredictionRequest(BaseModel):
+class Stage1PredictionRequest(BaseModel):
     text: str
-    age: int
+    age_group: str
     gender: str
-    age_category: str
 
+class Stage2PredictionRequest(BaseModel):
+    statement: str
+    age_group: str
+    gender: str
+    profession: str
 
-class PredictionResponse(BaseModel):
+class Stage1PredictionResponse(BaseModel):
     prediction: int
     confidence: float
+
+
+class Stage2PredictionResponse(BaseModel):
+    predicted_class: str
+    predicted_class_index: int
+    confidence: float
+    probabilities: List[float]
+    recommendation: Dict[str, Any]

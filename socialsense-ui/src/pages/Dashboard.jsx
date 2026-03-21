@@ -6,56 +6,121 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  Autocomplete,
+  TextField,
 } from "@mui/material";
 import NavBar from "../components/NavBar";
-import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Pie, Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from "chart.js";
 import toast from "react-hot-toast";
-import { firstStagePrediction, saveAnalysis } from "../api/analyseApi";
+import {
+  firstStagePrediction,
+  saveStage1Analysis,
+  saveStage2Analysis,
+  secondStagePrediction,
+} from "../api/analyseApi";
 import useAuth from "../store/useAuth";
+import useAnalysis from "../store/useAnalysis";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+);
 
 const Dashboard = () => {
   const user = useAuth((state) => state.user);
   const token = useAuth((state) => state.token);
+
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [age, setAge] = useState("");
+  const [stage1Result, setStage1Result] = useState(null);
+  const [stage2Result, setStage2Result] = useState(null);
+  const [age_group, setAgeGroup] = useState("");
   const [gender, setGender] = useState("");
+  const [profession, setProfession] = useState("");
+  const [stage2Loaded, setStage2Loaded] = useState(false);
+  const [stage2Loading, setStage2Loading] = useState(false);
+
   const textareaRef = useRef(null);
+  const scrollRef = useRef(null);
+  const { setAnalysisId } = useAnalysis();
 
-  const handleAnalyze = async () => {
+  const handleStage1Analysis = async () => {
     if (!text.trim()) return toast.error("Please enter some text");
-    if (!age) return toast.error("Please select age");
+    if (!age_group) return toast.error("Please select age group");
     if (!gender) return toast.error("Please select gender");
-
+    if (!profession) return toast.error("Please select profession");
     setLoading(true);
     try {
-      const data = { text, age, gender, age_category: "Teen Age" };
+      const data = { text, age_group, gender };
 
       const response = await firstStagePrediction(data);
-
       const analysisData = {
         userId: user?._id,
         text,
-        age,
+        age_group,
         gender,
         stage1: response,
         stage2: null,
       };
 
-      const response2 = await saveAnalysis(analysisData, token);
-      console.log(response2);
-      
-      if (response2) setResult(response2);
-      console.log(result);
+      const savedResponse = await saveStage1Analysis(analysisData, token);
+
+      if (savedResponse) {
+        setStage1Result(savedResponse);
+        setAnalysisId(savedResponse._id);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while analyzing.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStage2Analysis = async () => {
+    try {
+      setLoading(true);
+      setStage2Loading(true);
+      const data = {
+        statement: text,
+        age_group: age_group,
+        gender: gender,
+        profession: profession,
+      };
+      const response = await secondStagePrediction(data);
+
+      const savedResponse = await saveStage2Analysis(response, token);
+      console.log(savedResponse);
+
+      if (savedResponse) {
+        setStage2Result(savedResponse);
+        setStage2Loaded(true);
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while analyzing.");
+    } finally {
+      setLoading(false);
+      setStage2Loading(false);
     }
   };
 
@@ -70,10 +135,10 @@ const Dashboard = () => {
   };
 
   const renderResult = () => {
-    if (!result) return null;
+    if (!stage1Result) return null;
 
-    const isDepressed = result.stage1.prediction === 1;
-    const confidencePercent = (result.stage1.confidence * 100).toFixed(2);
+    const isDepressed = stage1Result.stage1.prediction === 1;
+    const confidencePercent = (stage1Result.stage1.confidence * 100).toFixed(2);
 
     const pieData = {
       labels: ["Confidence", "Remaining"],
@@ -98,7 +163,7 @@ const Dashboard = () => {
     };
 
     return (
-      <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 flex flex-col gap-6 mt-8 mb-28">
+      <div className="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 flex flex-col gap-6 mt-8 mb-6">
         <Typography variant="h5" className="text-gray-800 font-semibold">
           Stage 1 Result
         </Typography>
@@ -111,26 +176,27 @@ const Dashboard = () => {
             variant="body1"
             className="text-gray-700 whitespace-pre-wrap"
           >
-            {result.text}
+            {stage1Result.text}
           </Typography>
         </div>
 
         <div className="flex gap-6 text-gray-700">
           <Typography variant="body1">
-            <strong>Age:</strong> {result.age}
+            <strong>Age Group:</strong> {stage1Result.age_group}
           </Typography>
           <Typography variant="body1">
             <strong>Gender:</strong>{" "}
-            {gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : "N/A"}
+            {stage1Result.gender
+              ? stage1Result.gender.charAt(0).toUpperCase() +
+                stage1Result.gender.slice(1)
+              : "N/A"}
           </Typography>
         </div>
 
         <div className="flex flex-col items-center justify-center mt-4">
           <Typography
             variant="h6"
-            className={`font-semibold ${
-              isDepressed ? "text-red-600" : "text-green-600"
-            }`}
+            className={`font-semibold ${isDepressed ? "text-red-600" : "text-green-600"}`}
           >
             {isDepressed ? "Depression Detected" : "No Depression Detected"}
           </Typography>
@@ -142,7 +208,232 @@ const Dashboard = () => {
           <Typography variant="body1" className="mt-2 text-gray-700">
             Confidence: {confidencePercent}%
           </Typography>
+
+          {isDepressed && !stage2Loaded && !stage2Loading && (
+            <div className="w-full flex justify-center mt-12">
+              <Button
+                variant="contained"
+                onClick={handleStage2Analysis}
+                className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-md shadow-md"
+              >
+                Proceed to Stage 2 Analysis
+              </Button>
+            </div>
+          )}
         </div>
+
+        {stage2Result && (
+          <>
+            <hr className="my-6 border-gray-300 w-full" />
+
+            <Typography
+              variant="h5"
+              className="text-gray-800 font-semibold mt-12"
+            >
+              Stage 2 Result
+            </Typography>
+
+            <div className="bg-teal-50 p-4 rounded-lg">
+              <Typography variant="body1" className="text-gray-700">
+                Detected Type:{" "}
+                <span className="font-semibold text-teal-600">
+                  {stage2Result.stage2.depressionType}
+                </span>
+              </Typography>
+            </div>
+
+            <div className="w-full h-72 mt-6">
+              <Bar
+                data={{
+                  labels: [
+                    "Anxiety",
+                    "Bipolar",
+                    "Stress",
+                    "Personality Disorder",
+                    "Suicidal",
+                  ],
+                  datasets: [
+                    {
+                      label: "Probability",
+                      data: [
+                        stage2Result.stage2.confidence.anxiety,
+                        stage2Result.stage2.confidence.bipolar,
+                        stage2Result.stage2.confidence.stress,
+                        stage2Result.stage2.confidence.personalityDisorder,
+                        stage2Result.stage2.confidence.suicidal,
+                      ],
+                      backgroundColor: [
+                        "#3B82F6",
+                        "#8B5CF6",
+                        "#F59E0B",
+                        "#EC4899",
+                        "#EF4444",
+                      ],
+                      borderRadius: 6,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => context.raw.toFixed(2),
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      ticks: {
+                        callback: function (val) {
+                          const label = this.getLabelForValue(val);
+                          return label.length > 10
+                            ? label.match(/.{1,10}/g)
+                            : label;
+                        },
+                      },
+                    },
+                    y: {
+                      beginAtZero: true,
+                      max: 1,
+                      ticks: {
+                        callback: (value) => value.toFixed(2),
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+
+            {stage2Result.recommendation && (
+              <div className="mt-8 bg-white shadow-lg rounded-xl p-7 border border-gray-100">
+                <Typography
+                  variant="h5"
+                  className="text-gray-800 font-bold mb-5 flex items-center gap-2"
+                >
+                  Recommendations
+                </Typography>
+
+                {stage2Result.recommendation.recommendations?.length > 0 && (
+                  <div className="mb-6">
+                    <Typography
+                      variant="h6"
+                      className="text-blue-600 font-semibold mb-3"
+                    >
+                      Practical Tips
+                    </Typography>
+
+                    <div className="space-y-3">
+                      {stage2Result.recommendation.recommendations.map(
+                        (rec, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 bg-blue-50 p-4 rounded-lg"
+                          >
+                            <span className="text-blue-500 text-xl">✔</span>
+                            <Typography
+                              variant="body1"
+                              className="text-gray-700 text-base"
+                            >
+                              {rec}
+                            </Typography>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {stage2Result.recommendation.lifestyle_suggestions?.length >
+                  0 && (
+                  <div className="mb-6">
+                    <Typography
+                      variant="h6"
+                      className="text-green-600 font-semibold mb-3"
+                    >
+                      Lifestyle Suggestions
+                    </Typography>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {stage2Result.recommendation.lifestyle_suggestions.map(
+                        (item, index) => (
+                          <div
+                            key={index}
+                            className="bg-green-50 p-4 rounded-lg flex gap-3 items-start"
+                          >
+                            <span className="text-green-500 text-xl">🌿</span>
+                            <Typography
+                              variant="body1"
+                              className="text-gray-700 text-base"
+                            >
+                              {item}
+                            </Typography>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {stage2Result.recommendation.encouraging_message && (
+                  <div className="bg-purple-50 border-l-4 border-purple-400 p-5 rounded-lg mb-6">
+                    <Typography
+                      variant="h6"
+                      className="text-purple-700 font-semibold mb-2"
+                    >
+                      Encouragement
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      className="text-gray-700 italic text-lg"
+                    >
+                      “{stage2Result.recommendation.encouraging_message}”
+                    </Typography>
+                  </div>
+                )}
+
+                {stage2Result.recommendation.emergency_support && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-5 rounded-lg">
+                    <Typography
+                      variant="h6"
+                      className="text-red-700 font-bold mb-2"
+                    >
+                      ⚠️ Emergency Support
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      className="text-gray-800 font-semibold mb-2 text-lg"
+                    >
+                      {stage2Result.recommendation.emergency_support.message}
+                    </Typography>
+
+                    <ul className="list-disc list-inside text-gray-800 mb-2 space-y-1 text-base">
+                      {stage2Result.recommendation.emergency_support.helplines.map(
+                        (line, index) => (
+                          <li key={index}>{line}</li>
+                        ),
+                      )}
+                    </ul>
+
+                    <Typography
+                      variant="body1"
+                      className="text-gray-800 font-bold text-lg"
+                    >
+                      Emergency Number:{" "}
+                      {
+                        stage2Result.recommendation.emergency_support
+                          .emergency_number
+                      }
+                    </Typography>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   };
@@ -150,8 +441,11 @@ const Dashboard = () => {
   return (
     <>
       <NavBar />
-      <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col items-center relative">
-        <div className="flex-1 w-full overflow-y-auto flex flex-col items-center px-4 mt-6 pb-48">
+      <div className="flex-1 bg-gray-100 h-[calc(100vh-64px)] flex flex-col relative">
+        <div
+          ref={scrollRef}
+          className="flex-1 w-full overflow-y-auto flex flex-col items-center justify-start px-4 mt-6 pb-24"
+        >
           {renderResult()}
         </div>
 
@@ -176,20 +470,20 @@ const Dashboard = () => {
             />
 
             <div className="flex justify-between mt-4 items-center flex-wrap gap-4">
-              <div className="flex gap-4">
-                <FormControl variant="outlined" size="small" className="w-32">
-                  <InputLabel>Age</InputLabel>
+              <div className="flex gap-4 flex-wrap">
+                <FormControl variant="outlined" size="small" className="w-40">
+                  <InputLabel>Age Group</InputLabel>
                   <Select
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    label="Age"
+                    value={age_group}
+                    onChange={(e) => setAgeGroup(e.target.value)}
+                    label="Age Group"
                     disabled={loading}
                   >
-                    <MenuItem value={13}>13</MenuItem>
-                    <MenuItem value={14}>14</MenuItem>
-                    <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={16}>16</MenuItem>
-                    <MenuItem value={17}>17</MenuItem>
+                    <MenuItem value="Adolescent">Adolescent (13-17)</MenuItem>
+                    <MenuItem value="Young_Adult">Young Adult (18-30)</MenuItem>
+                    <MenuItem value="Adult">Adult (31-45)</MenuItem>
+                    <MenuItem value="Midlife">Midlife (46-60)</MenuItem>
+                    <MenuItem value="Elderly">Elderly (60+)</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -205,12 +499,43 @@ const Dashboard = () => {
                     <MenuItem value="female">Female</MenuItem>
                   </Select>
                 </FormControl>
+
+                <Autocomplete
+                  freeSolo
+                  options={[
+                    "Student",
+                    "Teacher",
+                    "Engineer",
+                    "Doctor",
+                    "Nurse",
+                    "Lawyer",
+                    "Business",
+                    "Artist",
+                    "Unemployed",
+                    "Retired",
+                    "Freelancer",
+                  ]}
+                  value={profession}
+                  onChange={(event, newValue) => setProfession(newValue)}
+                  onInputChange={(event, newInputValue) =>
+                    setProfession(newInputValue)
+                  }
+                  disabled={loading}
+                  className="w-48"
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Profession"
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                />
               </div>
 
               <Button
                 variant="contained"
-                color="primary"
-                onClick={handleAnalyze}
+                onClick={handleStage1Analysis}
                 className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-md"
                 disabled={loading}
               >
