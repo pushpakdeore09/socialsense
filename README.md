@@ -11,7 +11,6 @@ The model first detects whether a text shows signs of depression, and if detecte
 
 
 ## How SocialSense Works?
-
 The system follows a two-stage classification pipeline.
 
 **Stage 1:** Binary Depression Detection
@@ -23,35 +22,25 @@ LSTM / BiLSTM / RNN models
 Best performing model used for final prediction
 
 **Stage 2:** Multi-Class Mental Health Classification
-
 Activated only if depression is detected.
 The text is classified into one of the five categories:
 Suicidal, Anxiety, Bipolar, Stress, Personality Disorder.
 
 Two different feature groups are used:
-
 *Semantic–Psychological Features:*
 Sentiment polarity, Subjectivity, VADER score, Absolutist words, Hedonic score
-
 *Linguistic–Stylistic Features:* Readability score, Pronoun ratio,Punctuation density, Lexical diversity, POS ratio
-
 Two base models are trained separately and combined using stacking.
 
 **Ensemble Meta Model:** 
 The outputs of both base models are combined using Stacked Ensemble Learning.
-
 Base Model 1 → Semantic–Psychological Features
-
 Base Model 2 → Linguistic–Stylistic Features
-
 Meta Model → XGBoost
 
 *Additional reliability features:*
 
-Margin (confidence)
-
-Entropy (uncertainty)
-
+Margin (confidence), Entropy (uncertainty)
 This improves overall accuracy and robustness.
 
 **LLM Recommendation Module:**
@@ -61,7 +50,6 @@ This makes the system closer to a real-world AI mental health assistant.
 
 
 ## Features
-
 - Two-stage ML pipeline
 - Binary + Multi-class classification
 - BERT embeddings
@@ -77,15 +65,10 @@ This makes the system closer to a real-world AI mental health assistant.
 - Dashboard ready results
 
 ## Tech Stack
-
 **Languages Used:** JavaScript, Python
-
 **Client:** React, Tailwind CSS, Material UI
-
 **Server:** Node, FastAPI
-
 **Database:** MongoDB
-
 **Machine Learning:** Python, TensorFlow / Keras, Scikit-learn, XGBoost, NLTK, SpaCy, Transformers (BERT), GloVe
 
 
