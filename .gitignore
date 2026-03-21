@@ -6,10 +6,9 @@
 *.joblib
 *.safetensors
 
-binary_model/
-bm1/
-bm2/
-meta_model/
+/bert_model
+/bert_tokenizer
+
 __pycache__/
 *.pyc
 
