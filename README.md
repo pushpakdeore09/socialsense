@@ -1,7 +1,5 @@
 
-# Project Title
-
-SocialSense: Two-Stage text-based Depression Detection Framework
+# SocialSense: Two-Stage text-based Depression Detection Framework
 
 ## Overview
 
