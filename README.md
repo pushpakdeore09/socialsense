@@ -13,15 +13,11 @@ The system follows a two-stage classification pipeline.
 
 **Stage 1:** Binary Depression Detection
 Determines whether text is depressive or non-depressive
-Uses:
-BERT embeddings
-Age & Gender features
-LSTM / BiLSTM / RNN models
-Best performing model used for final prediction
+Uses:  
+BERT embeddings, Age Group & Gender features, LSTM / BiLSTM / RNN models
 
 **Stage 2:** Multi-Class Mental Health Classification
-Activated only if depression is detected.
-The text is classified into one of the five categories:
+Activated only if depression is detected. The text is classified into one of the five categories:  
 Suicidal, Anxiety, Bipolar, Stress, Personality Disorder.
 
 Two different feature groups are used:  
@@ -103,7 +99,7 @@ npm run start
 ```
 #### Step 3: FastAPI Setup (socialsense-model)
 ```
-cd fastapi
+cd socialsense-model
 python -m venv venv
 ```
 Activate virtual environment:  
