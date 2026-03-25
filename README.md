@@ -120,7 +120,7 @@ uvicorn app.main:app --reload
 ```
 #### Frontend Setup (socialsense-ui)
 ```
-cd react
+cd socialsense-ui
 npm install
 ```
 Run the frontend:
