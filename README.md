@@ -63,10 +63,6 @@ This makes the system closer to a real-world AI mental health assistant.
 **Database:** MongoDB
 **Machine Learning:** Python, TensorFlow / Keras, Scikit-learn, XGBoost, NLTK, SpaCy, Transformers (BERT), GloVe
 
-
-## System Architecture  
-![System Architecture](socialsense-ui/public/images/SS_ARCH.png)
-
 ## Installation  
 Follow the steps below to set up **SocialSense** locally.  
 ### Prerequisites
