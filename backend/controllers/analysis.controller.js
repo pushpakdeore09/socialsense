@@ -37,7 +37,6 @@ export const saveStage2AnalysisResult = async (req, res) => {
       return res.status(400).json({ message: "Stage 2 result data missing" });
     }
     const response = await saveStageTwo(req.body);
-    console.log("llm", response);
     
     const confidenceData = {
       anxiety: response.probabilities[0] || 0,

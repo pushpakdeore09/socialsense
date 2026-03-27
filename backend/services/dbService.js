@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import "dotenv/config";
 const stageTwo = new OpenAI({
-  apiKey: "AIzaSyD844MwMhztnaILFnxPtfjMfAmuCU6lbVk",
+  apiKey: process.env.GOOGLE_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
@@ -88,7 +88,7 @@ Rules:
 };
 
 const recommendation = new OpenAI({
-  apiKey: "AIzaSyD844MwMhztnaILFnxPtfjMfAmuCU6lbVk",
+  apiKey: process.env.GOOGLE_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
@@ -145,12 +145,14 @@ OUTPUT FORMAT (JSON)
   "recommendations": [
     "recommendation 1",
     "recommendation 2",
-    "recommendation 3"
+    "recommendation 3",
+    "recommendation 4"
   ],
   "lifestyle_suggestions": [
     "suggestion 1",
     "suggestion 2",
-    "suggestion 3"
+    "suggestion 3",
+    "suggestion 4"
   ],
   "encouraging_message": "Short supportive message",
   "emergency_support": null

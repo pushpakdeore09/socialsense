@@ -352,7 +352,7 @@ const Dashboard = () => {
                       variant="h6"
                       className="text-green-600 font-semibold mb-3"
                     >
-                      Lifestyle Suggestions
+                      Suggestions
                     </Typography>
 
                     <div className="grid md:grid-cols-2 gap-4">
